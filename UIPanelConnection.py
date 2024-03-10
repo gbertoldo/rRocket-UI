@@ -27,6 +27,7 @@ import wx
 import UITemplate
 import wxpserial
 import bitmaptools
+from UIModelessDialog import *
 
 class PanelConnection(UITemplate.PanelConnection):
     def __init__(self, parent):
@@ -60,9 +61,7 @@ class PanelConnection(UITemplate.PanelConnection):
         dialog.ShowModal()
 
         if self.parent.rRocketModel.isOpen():
-            self.parent.setReadyAppearance()
-            wx.MessageBox("Conectado com sucesso.", "Estado da conexão", wx.OK | wx.ICON_INFORMATION)
-            #self.parent.rRocketModel.readLastFlightData()
+            self.parent.rRocketModelStateUpdate()
         else:
             self.parent.setDisconnectedAppearance()
             wx.MessageBox("Falha na conexão.", "Estado da conexão", wx.OK | wx.ICON_ERROR)

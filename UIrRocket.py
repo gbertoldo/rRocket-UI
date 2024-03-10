@@ -37,10 +37,11 @@ from UIPanelSetup import *
 from UIFlightStatistics import *
 from UIPanelMemory import *
 from UIPanelSimulation import *
+from UIModelessDialog import *
 
 from rRocketModel import *
 
-APP_VERSION_STRING="v.1.0.0"
+APP_VERSION_STRING="v.1.0.1"
 
 def onLinux() -> bool:
 	if os.name == 'posix':
@@ -132,8 +133,7 @@ class rRocketUIListbook(wx.Listbook):
             self.setInitializingAppearance()
         else:
             self.rRocketModel.stop()
-            dlg = wx.MessageDialog(self, "Altímetro em estado desconhecido. Conexão fechada.", "Erro", wx.OK | wx.ICON_ERROR)
-            dlg.ShowModal()
+            wx.MessageBox(self, "Altímetro em estado desconhecido. Conexão fechada.", "Erro", wx.OK | wx.ICON_ERROR)
 
     def rRocketModelParameterUpdate(self):
         self.panelSetup.setRecordedValuesToForm()
@@ -145,13 +145,25 @@ class rRocketUIListbook(wx.Listbook):
             avec=self.rRocketModel.flightStatistics.getAccelerationVector()
             self.panelMemory.plotHVA(hvec, vvec, avec)
         else:
-            t=self.rRocketModel.flightAltitudeLogger.t
-            h=self.rRocketModel.flightAltitudeLogger.h
-            self.panelMemory.plotH(t, h)
+            self.panelMemory.plotEmpty()
 
     def rRocketModelFlightEventUpdate(self, evt):
         self.panelMemory.plotEvent(evt)
-               
+
+    def rRocketModelMessagesUpdate(self, msgs):
+        messages = ""
+        for msg in msgs:
+            messages = messages + "- " + str(msg) + "\n"
+        mbox = ModelessDialog(self, "Mensagem", messages, delayMS=5000)
+        mbox.Show()
+        
+    def rRocketModelErrorsUpdate(self, msgs):
+        errors = ""
+        for msg in msgs:
+            errors = errors + "- "+str(msg)+"\n"
+        mbox = ModelessDialog(self, "Erro", errors, delayMS=5000)
+        mbox.Show()
+
     def rRocketModelSimulationUpdate(self):
         t=self.rRocketModel.flightSimulationLogger.t
         h=self.rRocketModel.flightSimulationLogger.h
@@ -162,21 +174,12 @@ class rRocketUIListbook(wx.Listbook):
     def rRocketModelSimulationFlightEventUpdate(self, event):
         self.panelSimulation.plotEvent(event)
 
-    def rRocketModelMessagesUpdate(self, msgs):
-        #todo
-        for msg in msgs:
-            print(msg)
-        
-    def rRocketModelErrorsUpdate(self, msgs):
-        #todo
-        for msg in msgs:
-            print(msg)
-
     def rRocketModelFinishedReceivingMemoryReportUpdate(self):
         if len(self.rRocketModel.flightAltitudeLogger.t) < 1:
             self.panelMemory.plotEmpty()
             self.panelMemory.clearEvents()
-            wx.MessageBox("Memória de voo vazia.", "Estado da memória de voo", wx.OK | wx.ICON_INFORMATION)
+            mbox = ModelessDialog(self, "Estado da memória de voo", "Memória de voo vazia.", delayMS=5000)
+            mbox.Show()
         else:
             self.rRocketModelFlightUpdate()
 

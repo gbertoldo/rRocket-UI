@@ -29,6 +29,7 @@ import UITemplate
 import UIPlot
 from UIFlightStatistics import *
 from UIReportFrame import *
+from UIModelessDialog import *
 
 class PanelMemory(UITemplate.PanelMemory):
     def __init__(self, parent):
@@ -87,7 +88,8 @@ class PanelMemory(UITemplate.PanelMemory):
             reportFrm.Show() 
             event.Skip()
         else:
-            wx.MessageBox("Memória de voo vazia.", "Relatório de voo", wx.OK | wx.ICON_INFORMATION)
+            mbox = ModelessDialog(self, "Relatório de voo", "Memória de voo vazia.", delayMS=5000)
+            mbox.Show()
 
     def onBtnClearMemory( self, event ):
         if self.confirmMemoryErase():

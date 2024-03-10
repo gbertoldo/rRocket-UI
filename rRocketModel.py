@@ -135,9 +135,9 @@ class rRocketModel(wxpserial.wxPSerial):
         self.createFlightSimulationLogger()
         
         self.listOfParameters = []
-        self.listOfParameters.append(rRocketParameter(name=u"speedForLiftoffDetection", description=u"Velocidade para detecção de decolagem (m/s)",recordedValue=30, desiredValue=30, digits=0, minValue=10, maxValue=50, initialValue=30, increment=1))
-        self.listOfParameters.append(rRocketParameter(name=u"speedForFallDetection", description=u"Velocidade absoluta para detecção de queda (m/s)",recordedValue=30,  desiredValue=30, digits=0, minValue=10, maxValue=50, initialValue=30, increment=1))
-        self.listOfParameters.append(rRocketParameter(name=u"speedForApogeeDetection", description=u"Velocidade para detecção de apogeu (m/s)",recordedValue=7,  desiredValue=7, digits=0, minValue=-15, maxValue=15, initialValue=7, increment=1))
+        self.listOfParameters.append(rRocketParameter(name=u"speedForLiftoffDetection", description=u"Velocidade (em módulo) para detecção de decolagem (m/s)",recordedValue=30, desiredValue=30, digits=0, minValue=10, maxValue=50, initialValue=30, increment=1))
+        self.listOfParameters.append(rRocketParameter(name=u"speedForFallDetection", description=u"Velocidade (em módulo) para detecção de queda (m/s)",recordedValue=30,  desiredValue=30, digits=0, minValue=5, maxValue=50, initialValue=30, increment=1))
+        self.listOfParameters.append(rRocketParameter(name=u"speedForApogeeDetection", description=u"Velocidade para detecção de apogeu (m/s)",recordedValue=0,  desiredValue=0, digits=0, minValue=-15, maxValue=15, initialValue=0, increment=1))
         self.listOfParameters.append(rRocketParameter(name=u"parachuteDeploymentAltitude", description=u"Altura acima do ponto de lançamento para acionamento do paraquedas principal (m)",recordedValue=200,  desiredValue=200, digits=0, minValue=50, maxValue=10000, initialValue=200, increment=1))
         self.listOfParameters.append(rRocketParameter(name=u"displacementForLandingDetection", description=u"Deslocamento máximo para detecção de pouso (m)",recordedValue=3,  desiredValue=3, digits=0, minValue=2, maxValue=6, initialValue=3, increment=1))
         self.listOfParameters.append(rRocketParameter(name=u"maxNumberOfDeploymentAttempts", description=u"Número máximo de tentativas de acionamento de paraquedas (por paraquedas)",recordedValue=3,  desiredValue=3, digits=0, minValue=1, maxValue=100, initialValue=3, increment=1))
@@ -385,7 +385,7 @@ class rRocketModel(wxpserial.wxPSerial):
                     if len( self.flightSimulationLogger.status ) > 1:
                       if  (self.flightSimulationLogger.status[-1] == "L") and (self.flightSimulationLogger.status[-2] == "P"):
                         self.stopSimulationMode()
-                        self.readLastFlightData()
+                        #self.readLastFlightData()
 
                     updatedSimulation = True
                 if code == self.icode.flightPath:
@@ -396,23 +396,29 @@ class rRocketModel(wxpserial.wxPSerial):
                     updatedParameters = True
                 if code == self.icode.simulatedMode:
                     if int(msgSplit[1]) == 1:
-                        self.setState(rRocketState["Simulating"])
                         self.simulationMode = 1
                     else:
-                        self.setState(rRocketState["Ready"])
                         self.simulationMode = 0
 
                 if code == self.icode.startedInitialization:
                     self.setState(rRocketState["Initializing"])
                 if code == self.icode.finishedInitialization:
                     if self.simulationMode == 0:
+                        self.readLastFlightData()
                         self.setState(rRocketState["Ready"])
                     else:
                         self.setState(rRocketState["Simulating"])
                 if code == self.icode.stardedSendingMemoryReport:
                     self.setState(rRocketState["BusyForDataTransfer"])
                 if code == self.icode.finishedSendingMemoryReport:
-                    finishedMemoryReport = True                                           
+                    updatedFlight = False
+                    self.calculateFlightStatistics()
+                    for observer in self.observerList:
+                        observer.rRocketModelFinishedReceivingMemoryReportUpdate()
+                    if self.simulationMode == 0:
+                        self.setState(rRocketState["Ready"]) 
+                    else:
+                        self.setState(rRocketState["Simulating"])                                         
                 if code == self.icode.liftoffEvent:
                     evt=[float(msgSplit[1])*1E-3, 0, 0, 0, 'F']
                     self.flightEvents.append(evt)
@@ -476,27 +482,18 @@ class rRocketModel(wxpserial.wxPSerial):
                         if p.name == "timeStepScaler":
                             p.recordedValue = float(msgSplit[1])
                     updatedParameters = True
-        try:
-            if updatedParameters:
-                for observer in self.observerList:
-                        observer.rRocketModelParameterUpdate()
-            if updatedFlight:
-                self.calculateFlightStatistics()
-                for observer in self.observerList:
-                        observer.rRocketModelFlightUpdate()
-            if updatedSimulation:
-                for observer in self.observerList:
-                        observer.rRocketModelSimulationUpdate()
-            if finishedMemoryReport:
-                self.calculateFlightStatistics()
-                for observer in self.observerList:
-                    observer.rRocketModelFlightUpdate()
-                    observer.rRocketModelFinishedReceivingMemoryReportUpdate()
-                self.setState(rRocketState["Ready"]) 
 
-                    
-        except:
-            pass
+        if updatedParameters:
+            for observer in self.observerList:
+                    observer.rRocketModelParameterUpdate()
+        if updatedFlight:
+            self.calculateFlightStatistics()
+            for observer in self.observerList:
+                    observer.rRocketModelFlightUpdate()
+        if updatedSimulation:
+            for observer in self.observerList:
+                    observer.rRocketModelSimulationUpdate()
+
         try:
             if len(data["errors"] ) > 0:
                 for observer in self.observerList:

@@ -537,3 +537,52 @@ class FlightStatisticsFrame ( wx.Frame ):
         event.Skip()
 
 
+###########################################################################
+## Class ModelessDialog
+###########################################################################
+
+class ModelessDialog ( wx.Dialog ):
+
+    def __init__( self, parent ):
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Notification", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+
+        self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+
+        bSizer19 = wx.BoxSizer( wx.VERTICAL )
+
+        self.m_panel8 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        bSizer20 = wx.BoxSizer( wx.VERTICAL )
+
+        self.txtMessage = wx.StaticText( self.m_panel8, wx.ID_ANY, u"Message", wx.DefaultPosition, wx.Size( -1,-1 ), 0 )
+        self.txtMessage.Wrap( -1 )
+
+        bSizer20.Add( self.txtMessage, 1, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+
+        self.btnOk = wx.Button( self.m_panel8, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer20.Add( self.btnOk, 0, wx.ALL|wx.ALIGN_RIGHT, 5 )
+
+
+        self.m_panel8.SetSizer( bSizer20 )
+        self.m_panel8.Layout()
+        bSizer20.Fit( self.m_panel8 )
+        bSizer19.Add( self.m_panel8, 1, wx.EXPAND, 5 )
+
+
+        self.SetSizer( bSizer19 )
+        self.Layout()
+        bSizer19.Fit( self )
+
+        self.Centre( wx.BOTH )
+
+        # Connect Events
+        self.btnOk.Bind( wx.EVT_BUTTON, self.onBtnOk )
+
+    def __del__( self ):
+        pass
+
+
+    # Virtual event handlers, override them in your derived class
+    def onBtnOk( self, event ):
+        event.Skip()
+
+

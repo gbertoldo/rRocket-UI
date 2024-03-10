@@ -29,6 +29,7 @@ import UIPlot
 import FlightDataImporter
 from UIReportFrame import *
 from rRocketModel import *
+from UIModelessDialog import *
 
 class PanelSimulation(UITemplate.PanelSimulation):
     def __init__(self, parent):
@@ -54,15 +55,15 @@ class PanelSimulation(UITemplate.PanelSimulation):
 
     def isFileValid(self, filename):
         if filename == "":
-            dlg = wx.MessageDialog(self, "Por favor, selecione um arquivo de trajetória.", "Erro", wx.OK | wx.ICON_ERROR)
-            dlg.ShowModal()
+            dlg = ModelessDialog(self, "Erro", "Por favor, selecione um arquivo de trajetória.", delayMS=5000)
+            dlg.Show()
             return False
         try:
             data = FlightDataImporter.importData(filename)
             return True
         except:
-            dlg = wx.MessageDialog(self, "Falha ao carregar arquivo.", "Erro", wx.OK | wx.ICON_ERROR)
-            dlg.ShowModal()
+            dlg = ModelessDialog(self, "Erro", "Falha ao carregar arquivo.", delayMS=5000)
+            dlg.Show()
             return False
 
     def onBtnStartStopSimulation( self, event ):

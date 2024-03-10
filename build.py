@@ -1,4 +1,6 @@
 import os
+import shutil
+
 """
 cmd='pyinstaller'
   +' --clean' # Removes previous compilation
@@ -9,10 +11,12 @@ cmd='pyinstaller'
   +' --add-data "./fig/*.png;fig/"' # Adds the figures to the executable
   +' --name guiduino' # Names the executable
   +' main.py' # Start file
-"""
-cmd='pyinstaller --clean --onefile --windowed --icon="./fig/rRocket.ico" --add-data "./fig/*.png;fig/" --name rRocketUI main.py'
-#cmd='pyinstaller --clean --onedir --windowed --icon="./fig/rRocket.ico" --add-data "./fig/*.png;fig/" --name rRocketUI main.py'
 
+  """
 
+shutil.copytree('sim', 'dist/sim', dirs_exist_ok=True) 
+
+cmd='pyinstaller --clean --onefile --windowed --icon="./fig/rRocket.ico" --add-data "./fig/*.png;fig/" --add-data "./fig/*.ico;fig/" --name rRocketUI main.py'
 
 os.system(cmd)
+
