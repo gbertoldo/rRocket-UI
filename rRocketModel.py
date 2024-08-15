@@ -396,6 +396,7 @@ class rRocketModel(wxpserial.wxPSerial):
                     else:
                         self.setState(rRocketState["Simulating"])
                 if code == self.icode.stardedSendingMemoryReport:
+                    self.clearFlightLogger()
                     self.setState(rRocketState["BusyForDataTransfer"])
                 if code == self.icode.finishedSendingMemoryReport:
                     updatedFlight = False
