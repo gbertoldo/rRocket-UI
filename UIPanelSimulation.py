@@ -30,6 +30,8 @@ import FlightDataImporter
 from UIReportFrame import *
 from rRocketModel import *
 from UIModelessDialog import *
+import UIInputFileFormatFrame
+import os
 
 class PanelSimulation(UITemplate.PanelSimulation):
     def __init__(self, parent):
@@ -39,9 +41,14 @@ class PanelSimulation(UITemplate.PanelSimulation):
         self.plotPanel = UIPlot.rRocketPlot( self.panelBase, ["-*","-x","-o"], 10,100, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.plotPanel.setXLabel("t (s)")
         self.plotPanel.setYLabel("")
+        self.plotPanel.setTitle("")
         self.plotPanel.setLegend(["Altura (m)", "Velocidade (m/s)", "Aceleração (m/s²)"])
         self.plotPanel.setGrid()
         self.plotPanel.addToolbar()
+
+        self.inputFileFormat = UIInputFileFormatFrame.InputFileFormat()
+        self.tmpFolder="tmp"
+        self.simfilename=self.tmpFolder+"/"+"rRocketSimFile.txt"
 
     def plot(self, t, h, v, a):
         self.plotPanel.draw([[t,h],[t,v],[t,a]])
@@ -49,6 +56,10 @@ class PanelSimulation(UITemplate.PanelSimulation):
     def plotEvent(self, event):
         self.plotPanel.plotEvent(event)
 
+    def onBtnSetTitle( self, event ):
+        txt = self.txtCtrlPlotTitle.GetValue()
+        self.plotPanel.setTitle(txt)
+ 
     def onFileChanged( self, event ):
         filename = self.filePicker.GetPath()
         #self.isFileValid(filename)
@@ -59,18 +70,49 @@ class PanelSimulation(UITemplate.PanelSimulation):
             dlg.Show()
             return False
         try:
-            data = FlightDataImporter.importData(filename)
+            ifile=filename
+            ofile=self.simfilename
+            # Creating tmp directory, if not exist yet
+            os.makedirs(self.tmpFolder, exist_ok = True)
+
+            FlightDataImporter.removeHeaderLinesFromFile(ifile,ofile,self.inputFileFormat.headerLines)
+            if self.inputFileFormat.fieldSeparator == "," and self.inputFileFormat.decimalSeparator==",":
+                FS = ";"
+                FlightDataImporter.replaceStrInFile(ofile,ofile,", ",FS)
+            else:
+                FS = self.inputFileFormat.fieldSeparator
+                      
+            if self.inputFileFormat.decimalSeparator == ",":
+                FlightDataImporter.replaceStrInFile(ofile,ofile,",",".")
+
+            tCol = self.inputFileFormat.tCol-1
+            hCol = self.inputFileFormat.hCol-1
+            data = FlightDataImporter.importData(ofile,cols=[tCol,hCol],sep=FS, engine="python",comment=self.inputFileFormat.comment)
+            
+            # Converts the altitude unit to meter
+            data[1] = data[1] * self.inputFileFormat.hUnit
+            
+            with open(ofile, 'w') as fp:
+                for i in range(0,len(data[0])):
+                    fp.write(("%14.7f %14.7f\n")%(data[0][i],data[1][i]))
             return True
         except:
             dlg = ModelessDialog(self, "Erro", "Falha ao carregar arquivo.", delayMS=5000)
             dlg.Show()
             return False
+        
+    def onButtonSetupInputFileFormat(self, event):
+        frm = UIInputFileFormatFrame.InputFileFormatFrame(self, self.inputFileFormat)
+        frm.Show()
+
+    def setInputFileFormat(self, fmt):
+        self.inputFileFormat = fmt
 
     def onBtnStartStopSimulation( self, event ):
         if self.parent.rRocketModel.state == rRocketState["Ready"]:
             filename = self.filePicker.GetPath()
             if self.isFileValid(filename):
-                self.parent.rRocketModel.startSimulationMode(filename)    
+                self.parent.rRocketModel.startSimulationMode(filename, self.simfilename)    
                 self.plotPanel.clearEvents()    
         else:
             self.parent.rRocketModel.stopSimulationMode()

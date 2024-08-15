@@ -77,7 +77,7 @@ class FilterCentralIntegralAverage:
     return sum/(iend-ibeg)
 
 
-class FlightStatisticsS01:
+class FlightStatisticsMovingAverage:
     """
       Calculates speed and acceleration from the altitude curve.
       Applies a filter to reduce noise from calculations. 
@@ -188,9 +188,9 @@ class FlightStatisticsS01:
 
     def description(self, cmt="# ", eol="\r\n"):
       log = []
-      log.append("Estatística de voo (Modelo S01)")
+      log.append("Estatística de voo (Modelo Média Móvel)")
       log.append("")
-      log.append("Modelo S01 para cálculo de velocidade v e de aceleração a verticais")
+      log.append("Modelo Média Móvel para cálculo de velocidade v e de aceleração a verticais")
       log.append("a partir da altura h como função do tempo t. Aplica interpolação linear")
       log.append("para obter particionamento uniforme (com partição dt) de h(t), caso os dados")
       log.append("de entrada não estejam uniformemente particionados. Aplica filtro do tipo ")
@@ -244,126 +244,3 @@ class FlightStatisticsS01:
       for line in log2:
         txt = txt + line + eol
       return txt
-
-
-class FlightStatisticsS02:
-    # todo: finish this class
-    def __init__(self, m=8, n=8, deltaT=0.1, filter=FilterBackwardMovingAverage(n=8)):
-      self.m = m 
-      self.n = n
-      self.deltaT = deltaT
-      self.filter = filter
-
-      self.N    = 1 + 2*n + 2*m # Minimum number of altitude measurements
-      self.Nbar = self.N-1      # Last index of the vectors
-
-      self.traw  = np.array([]) # raw time (not uniformly distributed)
-      self.hraw  = np.array([]) # raw altitude
-      self.t     = np.array([]) # uniformly distributed time (deltaT)
-      self.h     = np.array([]) # altitude h(t)
-      self.hf    = np.array([]) # filtered altitude
-      self.v     = np.array([]) # velocity
-      self.ve    = np.array([]) # velocity estimated
-      self.a     = np.array([]) # acceleration
-
-    def appendAltitude(self, time, altitude):
-      self.traw = np.append(self.traw, time)
-      self.hraw = np.append(self.hraw, altitude)
-
-    def calculate(self):
-      if len(self.traw) > 1:
-        tmin = self.traw[0]
-        tmax = self.traw[-1]
-        self.t, self.h = pathLinSpace(self.traw, self.hraw, self.deltaT, tmin, tmax)
-        if self.isReady():
-          self.hf = np.zeros(len(self.t))
-          self.v  = np.zeros(len(self.t))
-          self.ve = np.zeros(len(self.t))
-          self.a  = np.zeros(len(self.t))
-          imin = 2*self.n
-          imax = len(self.t)
-          for i in range(imin,imax):
-            self.hf[i] = self.filter.filter(i,self.h)
-          
-          imin = 2*(self.n+self.m)
-          imax = len(self.t)
-          dT = (self.deltaT*self.m)
-          model = 1
-          if model == 1:
-            for i in range(imin,imax):
-              vp = (self.hf[i]-self.hf[i-2*self.m])/(2.0*dT)
-              ap = (self.hf[i]-2.0*self.hf[i-self.m]+self.hf[i-2*self.m])/(dT*dT)
-              self.v[i] = vp
-              self.a[i] = ap
-              self.ve[i] = vp+ap*self.deltaT*(self.m+self.n)
-          elif model == 2:
-            for i in range(imin,imax):             
-              vp = (3.0*self.hf[i]-4.0*self.hf[i-self.m]+self.hf[i-2*self.m])/(2.0*dT)
-              ap = (self.hf[i]-2.0*self.hf[i-self.m]+self.hf[i-2*self.m])/(dT*dT)
-              self.v[i] = vp
-              self.a[i] = ap
-              self.ve[i] = vp+ap*self.deltaT*(self.n)
-          else:
-            for i in range(imin,imax):                         
-              v1 = (self.hf[i]-self.hf[i-2*self.m])/(2.0*dT)
-              v2 = (3.0*self.hf[i]-4.0*self.hf[i-self.m]+self.hf[i-2*self.m])/(2.0*dT)
-              ap = (v2-v1)/dT
-              v3 = v2 + ap*self.deltaT*self.n
-              self.v[i] = v2
-              self.a[i] = ap
-              self.ve[i] = v3         
-
-    def minNumberOfMeasurements(self):
-      return self.N
-
-    def isReady(self):
-      return len(self.t) >= self.N
-
-    def getAltitudeVector(self):
-      return [self.t, self.h]
-    
-    def getFilteredAltitudeVector(self):
-      pos=self.n
-      return [self.t[pos:-pos],self.hf[pos:-pos]]
-    
-    def getVelocityVector(self):
-      pos=self.n+self.m
-      return [self.t[pos:-pos],self.v[pos:-pos]]
-    
-    def getAccelerationVector(self):
-      pos=self.n+self.m
-      return [self.t[pos:-pos],self.a[pos:-pos]]
-    
-    def getApogee(self):
-      t, h = self.getAltitudeVector()
-      idx = h.argmax()
-      return [t[idx], h[idx]]
-    
-    def getMaxSpeed(self):
-      t, v = self.getVelocityVector()
-      idx = v.argmax()
-      return [t[idx], v[idx]]
-    
-    def getMaxAcceleration(self):
-      t, a = self.getAccelerationVector()
-      idx = a.argmax()
-      return [t[idx], a[idx]]
-
-if __name__ == "__main__":
-
-  m = 8
-  n = 8
-  deltaT = 0.1
-
-  flight = FlightStatisticsS01(m, n, deltaT, filter=FilterCenteredMovingAverage(n))
-
-  #traw, hraw = importData("launch-11.txt")
-  traw, hraw = importData("sim01.txt")
-
-  flight.calculate(traw, hraw)
-
-  print(flight.report())
-
-  with open("sim01_out.txt","w") as fout:
-    for i in range(0,len(flight.t)):
-      fout.write("%9.2f %9.2f %9.2f %9.2f %9.2f %9.2f\n"%(flight.t[i], flight.h[i], flight.hf[i], flight.v[i], flight.ve[i], flight.a[i]))

@@ -27,9 +27,9 @@ import wx
 import numpy as np
 import UITemplate
 import UIPlot
-from UIFlightStatistics import *
 from UIReportFrame import *
 from UIModelessDialog import *
+import UIInputFileFormatFrame
 
 class PanelMemory(UITemplate.PanelMemory):
     def __init__(self, parent):
@@ -39,13 +39,15 @@ class PanelMemory(UITemplate.PanelMemory):
         self.btnClearMemory.SetBackgroundColour(wx.Colour(wx.RED))
         #self.btnClearMemory.SetForegroundColour(wx.Colour(wx.WHITE))
         # Plot panel
-        self.plotPanel = UIPlot.rRocketPlot(self.panelBase, ["-*","-x","-o"], 10,100, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.plotPanel = UIPlot.rRocketPlot(self.panelBase, ["-*"], 10,100, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.plotPanel.setXLabel("t (s)")
-        self.plotPanel.setYLabel("")
-        self.plotPanel.setLegend(["Altura (m)", "Velocidade (m/s)", "Aceleração (m/s²)"])
+        self.plotPanel.setYLabel("h (m)")
+        #self.plotPanel.setLegend(["Altura (m)"])
         self.plotPanel.setGrid()
         self.plotPanel.addToolbar()
         #self.plotEmpty()
+
+        self.inputFileFormat = UIInputFileFormatFrame.InputFileFormat()
 
     def confirmMemoryErase(self):
         dlg = wx.MessageDialog(self, "O procedimento apagará a memória do último voo. Confirma?", "Confirmar limpeza de memória de voo", wx.YES_NO | wx.ICON_WARNING)
@@ -56,26 +58,17 @@ class PanelMemory(UITemplate.PanelMemory):
             return False
 
     def plotEmpty(self):
-        p = [np.array([0,0]),np.array([[0,0]])]
-        self.plotPanel.draw([p,p,p])
+        p = [np.array([0,0])]
+        self.plotPanel.draw(p)
     
-    def plotHVA(self, data1, data2, data3):
-        self.plotPanel.draw([data1, data2, data3])
+    def plotH(self, data):
+        self.plotPanel.draw([data])
 
     def plotEvent(self, evt):
         self.plotPanel.plotEvent(evt, showH=False)
 
     def clearEvents(self):
         self.plotPanel.clearEvents()
-
-    def setupFlightStatistics(self, flightStatistics):
-        self.parent.rRocketModel.flightStatistics = flightStatistics
-        self.parent.rRocketModel.readLastFlightData()
-
-    def onBtnSetupFlightStatistics( self, event ):
-        flightStatistics = self.parent.rRocketModel.flightStatistics
-        frm = FlightStatisticsFrame(self, flightStatistics)
-        frm.Show()
 
     def onBtnReadMemory( self, event ):
         self.parent.rRocketModel.readLastFlightData()
@@ -96,24 +89,25 @@ class PanelMemory(UITemplate.PanelMemory):
             self.parent.rRocketModel.clearLastFlight()
             self.plotEmpty()
             self.clearEvents()
+            
+    def onBtnSetTitle( self, event ):
+        txt = self.txtCtrlPlotTitle.GetValue()
+        self.plotPanel.setTitle(txt)
 
     def setDisconnectedAppearance(self):
         self.btnClearMemory.Enable(False)
         self.btnFlightReport.Enable(False)
         self.btnReadMemory.Enable(False)
-        self.btnSetupFlightStatistics.Enable(False)
 
     def setReadyAppearance(self):
         self.btnClearMemory.Enable(True)
         self.btnFlightReport.Enable(True)
         self.btnReadMemory.Enable(True)
-        self.btnSetupFlightStatistics.Enable(True)
 
     def setInitializingAppearance(self):
         self.btnClearMemory.Enable(False)
         self.btnFlightReport.Enable(False)
         self.btnReadMemory.Enable(False)
-        self.btnSetupFlightStatistics.Enable(False)
 
     def setSimulatingAppearance(self):
         self.clearEvents()
@@ -121,11 +115,9 @@ class PanelMemory(UITemplate.PanelMemory):
         self.btnClearMemory.Enable(False)
         self.btnFlightReport.Enable(False)
         self.btnReadMemory.Enable(False)
-        self.btnSetupFlightStatistics.Enable(False)
 
     def setBusyForDataTransferAppearance(self):
         self.btnClearMemory.Enable(False)
         self.btnFlightReport.Enable(False)
         self.btnReadMemory.Enable(False)
-        self.btnSetupFlightStatistics.Enable(False)
 

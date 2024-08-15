@@ -34,6 +34,7 @@ class PanelSetup(UITemplate.PanelSetup):
         self.parent = parent
         self.listOfParameters = self.parent.rRocketModel.listOfParameters
         self.createPanelParameters()
+        self.btnRestoreFactoryParameters.SetBackgroundColour(wx.Colour(wx.RED))
       
     def createPanelParameters(self):
         self.listOfWidgets = []
@@ -140,7 +141,7 @@ class PanelSetup(UITemplate.PanelSetup):
 
     def setInitializingAppearance(self):
         self.txtFirmwareVersion.SetLabel("Versão de firmware: ---")
-        self.btnRestoreFactoryParameters.Enable(False)
+        self.btnRestoreFactoryParameters.Enable(True)
         self.btnReadParameters.Enable(False)
         self.btnWriteParameters.Enable(False)
         self.btnParametersReport.Enable(False)
@@ -154,7 +155,7 @@ class PanelSetup(UITemplate.PanelSetup):
 
     def setBusyForDataTransferAppearance(self):
         self.txtFirmwareVersion.SetLabel("Versão de firmware: "+self.parent.rRocketModel.firmwareVersion)
-        self.btnRestoreFactoryParameters.Enable(False)
+        self.btnRestoreFactoryParameters.Enable(True)
         self.btnReadParameters.Enable(False)
         self.btnWriteParameters.Enable(False)
         self.btnParametersReport.Enable(False)

@@ -18,4 +18,7 @@ launch-15: Urano-PR-27-v2_mp-85_LT-2019-12-02
 launch-16: Netuno-F_Galateia-10_mp-17_LT-2024-01-14
 launch-17: Netuno-F_Galateia-10_rRocket-EZ1.5.7_LT-2024-01-14
 launch-18: Saturno-Alfa-2_Tita-4_rRocket-EZ-2023-1_LT-2024-01-14
-
+launch-19: Voo transônico extraído de: Barometric Apogee Detection Using the Kalman Filter. A NAR Research and Development  Report "C" Division NARAM 44, 2002. By David Schultz. NAR #63255. Dados reais até o apogeu. Depois do apogeu, adicionou-se queda livre para completar a trajetória.
+launch-20: Voo transônico Urano/Paraná-XVb LT 7 Set 2018 (1211 m)
+launch-21: Voo transônico RD-05 Stratologger 2016-05-06 (2232 m)
+launch-22: Atom GFRJ-UFRJ-Canalle-2018-8-20

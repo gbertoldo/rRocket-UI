@@ -34,14 +34,15 @@ import UITemplate
 from UIReportFrame import *
 from UIPanelConnection import *
 from UIPanelSetup import *
-from UIFlightStatistics import *
+from UIFlightStatisticsSetup import *
 from UIPanelMemory import *
 from UIPanelSimulation import *
+from UIPanelStatistics import *
 from UIModelessDialog import *
 
 from rRocketModel import *
 
-APP_VERSION_STRING="v.1.0.1"
+APP_VERSION_STRING="v.1.1.0"
 
 def onLinux() -> bool:
 	if os.name == 'posix':
@@ -74,10 +75,12 @@ class rRocketUIListbook(wx.Listbook):
         fig2 = bitmaptools.scale_bitmap(wx.Bitmap( bitmaptools.resource_path(u"fig/setting-line-icon.png"), wx.BITMAP_TYPE_ANY ), toolsize, toolsize)
         fig3 = bitmaptools.scale_bitmap(wx.Bitmap( bitmaptools.resource_path(u"fig/chip-memory-icon.png"), wx.BITMAP_TYPE_ANY ), toolsize, toolsize)
         fig4 = bitmaptools.scale_bitmap(wx.Bitmap( bitmaptools.resource_path(u"fig/metaverse-virtual-reality-icon.png"), wx.BITMAP_TYPE_ANY ), toolsize, toolsize)
+        fig5 = bitmaptools.scale_bitmap(wx.Bitmap( bitmaptools.resource_path(u"fig/chart-arrow-up-icon.png"), wx.BITMAP_TYPE_ANY ), toolsize, toolsize)
         il.Add(fig1)
         il.Add(fig2)
         il.Add(fig3)
         il.Add(fig4)
+        il.Add(fig5)
         self.AssignImageList(il)
 
         self.serialParameters = wxpserial.SerialParameters(port=None
@@ -98,16 +101,19 @@ class rRocketUIListbook(wx.Listbook):
         self.panelSetup = PanelSetup(self)
         self.panelMemory = PanelMemory(self)
         self.panelSimulation = PanelSimulation(self)
+        self.panelStatistics = PanelStatistics(self, APP_VERSION_STRING)
 
         pages = [(self.panelConnection, "Conexão"),
                  (self.panelSetup, "Configuração"),
                  (self.panelMemory, "Memória de voo"),
-                 (self.panelSimulation, "Simulação")]
+                 (self.panelSimulation, "Simulação"),
+                 (self.panelStatistics, "Estatística")]
         imID = 0
         for page, label in pages:
             self.AddPage(page, label, imageId=imID)
             imID += 1
         self.setDisconnectedAppearance()
+
 
     def isFirmwareVersionCompatible(self,version):
         decomposedVersion = version.strip().split(".")
@@ -139,11 +145,10 @@ class rRocketUIListbook(wx.Listbook):
         self.panelSetup.setRecordedValuesToForm()
 
     def rRocketModelFlightUpdate(self):
-        if self.rRocketModel.flightStatistics.isReady():
-            hvec=self.rRocketModel.flightStatistics.getRawAltitudeVector()
-            vvec=self.rRocketModel.flightStatistics.getVelocityVector()
-            avec=self.rRocketModel.flightStatistics.getAccelerationVector()
-            self.panelMemory.plotHVA(hvec, vvec, avec)
+        t=self.rRocketModel.flightAltitudeLogger.t
+        h=self.rRocketModel.flightAltitudeLogger.h
+        if len(t) > 0:
+            self.panelMemory.plotH([t,h])
         else:
             self.panelMemory.plotEmpty()
 
@@ -194,7 +199,7 @@ class rRocketUIListbook(wx.Listbook):
         for line in log:
             txt = txt + cmt + line + eol
 
-        txt = txt + self.rRocketModel.flightStatisticsReport()        
+        txt = txt + self.rRocketModel.flightReport()        
         return txt
 
     def getFlightSimulationReport(self,cmt="# ",eol="\r\n"):

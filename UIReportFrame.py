@@ -50,7 +50,7 @@ class ReportFrame(UITemplate.ReportFrame):
 
             pathname = fileDialog.GetPath()
             try:
-                with open(pathname, 'w') as file:
+                with open(pathname, 'w', encoding='utf-8') as file:
                     txt = self.txtCtrlLog.GetValue()
                     file.write(txt)
             except IOError:

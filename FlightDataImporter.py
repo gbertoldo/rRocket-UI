@@ -26,11 +26,41 @@
 import pandas as pd 
 import numpy as np
 
-def importData(filename):
-  df = pd.read_csv(filename, sep="\s+", comment='#', header=None, skip_blank_lines=True) 
-  time     = df[df.columns[0]].to_numpy()
-  altitude = df[df.columns[1]].to_numpy()
+def importData(filename, cols=[0,1], sep="\s+", engine='c', comment='#', header=None, skip_blank_lines=True):
+  df = pd.read_csv(filename, sep=sep, comment=comment, engine=engine, header=header, skip_blank_lines=skip_blank_lines) 
+  time     = df[df.columns[cols[0]]].to_numpy()
+  altitude = df[df.columns[cols[1]]].to_numpy()
   return([time,altitude])
+
+def replaceStrInFile(ifile, ofile, strFrom, strTo):
+  # Read in the file
+  with open(ifile, 'r') as file:
+    filedata = file.read()
+
+  # Replace the target string
+  filedata = filedata.replace(strFrom, strTo)
+
+  # Write the file out again
+  with open(ofile, 'w', encoding="utf-8") as file:
+    file.write(filedata)
+
+def removeHeaderLinesFromFile(ifile, ofile, numberOfLines):
+  lines = []
+
+  # reading file
+  with open(ifile, 'r') as fp:
+      # read an store all lines into list
+      lines = fp.readlines()
+
+  iPos = numberOfLines
+  if iPos < 0:
+     iPos=0
+
+  # Write file
+  with open(ofile, 'w', encoding="utf-8") as fp:
+      for line in lines[iPos:]:
+        fp.write(line)
+
 
 class LinearInterpolator:
   def __init__(self, x, y):

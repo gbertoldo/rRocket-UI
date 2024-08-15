@@ -28,6 +28,7 @@ from matplotlib.backends.backend_wxagg import (
     FigureCanvasWxAgg as FigureCanvas,
     NavigationToolbar2WxAgg as NavigationToolbar)
 from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
 import numpy as np
 # https://www.youtube.com/playlist?list=PLecOfLY9Yl9cqDZ1opVnWWfAxqrDgk-MH
 
@@ -58,6 +59,12 @@ class wxMultiPlotPanel(wx.Panel):
     command = command + "x,x,plotstyles["+str(i)+"])"
     exec(command)
 
+    # Capturing mouse events
+    self.canvas.mpl_connect('button_press_event', self.onClick)
+
+    # Markers
+    self.pointMarkers = []
+
     # Drawing the figure
     self.canvas.draw()
 
@@ -69,6 +76,7 @@ class wxMultiPlotPanel(wx.Panel):
     self.Fit()
 
   def draw(self, vec, events=[]):
+    self.clearPointMarkers()
     numberOfLines = len(vec)
     xmin = 1e10
     xmax = -1e10
@@ -108,6 +116,15 @@ class wxMultiPlotPanel(wx.Panel):
   def setYLabel(self, label):
     self.axes.set_ylabel(label)
 
+  def setTitle(self, label):
+    self.axes.set_title(label)
+    self.UpdatePlot()
+
+  def UpdatePlot(self):
+    self.canvas.draw()
+    self.canvas.flush_events()
+    self.Refresh()
+
   def setLegend(self, legends):
     for i in range(0,len(legends)):     
      self.lines[i].set_label(legends[i])
@@ -117,10 +134,95 @@ class wxMultiPlotPanel(wx.Panel):
     self.axes.grid()
 
   def addToolbar(self):
-      self.toolbar = NavigationToolbar(self.canvas)
-      self.toolbar.Realize()
-      # By adding toolbar in sizer, we are able to put it at the bottom
-      # of the frame - so appearance is closer to GTK version.
-      self.sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
-      # update the axes menu on the toolbar
-      self.toolbar.update()
+    self.toolbar = NavigationToolbar(self.canvas)
+    self.toolbar.Realize()
+    # By adding toolbar in sizer, we are able to put it at the bottom
+    # of the frame - so appearance is closer to GTK version.
+    self.sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
+    # update the axes menu on the toolbar
+    self.toolbar.update()
+
+  def onClick(self, event):
+    if event.xdata and event.ydata:
+      dx, dy = self.getPlotSize()
+      d2ref = dx**2 + dy**2
+      xdata=np.array([])
+      ydata=np.array([])
+      for line in self.lines:
+        xdata = np.append(xdata,line.get_xdata())
+        ydata = np.append(ydata,line.get_ydata())
+      ans = self.getClosestPlotPointInfo(xdata, ydata, event.xdata, event.ydata)
+      cp = ans["closestPoint"]
+      d2 = ans["distSquared"]
+      if (d2 < 0.000001 * d2ref ):
+        self.clearPointMarkers()
+        self.addPointMarker(cp[0],cp[1])
+      else:
+        self.clearPointMarkers()
+        return
+
+  def clearPointMarkers(self):
+    for marker in self.pointMarkers:
+          self.removePointMarker()
+
+  def getClosestPointInfo(self, xdata, ydata, x, y):
+    dx2 = (xdata-x)**2
+    dy2 = (ydata-y)**2
+    ds2 = dx2+dy2
+    idx = np.argmin(ds2)
+    ans={"closestPoint":[xdata[idx],ydata[idx]],"distSquared":ds2[idx]}
+    return ans
+  
+  def getClosestPlotPointInfo(self, xdata, ydata, x, y):
+    rwidth, rheight = self.getPlotSize()
+    aspect = self.getFrameAspectRatio() 
+    if aspect > 0 :
+      rwidth = rwidth * aspect
+    dx2 = (xdata-x)**2
+    dy2 = ((ydata-y)*rwidth/rheight)**2
+    ds2 = dx2+dy2
+    idx = np.argmin(ds2)
+    ans={"closestPoint":[xdata[idx],ydata[idx]],"distSquared":ds2[idx]}
+    return ans
+
+  def getFrameAspectRatio(self):
+        width, height = self.GetSize()      
+        # Calculating the aspect ratio
+        if width != 0: 
+            aspectRatio = height/width
+        else:
+            aspectRatio=0
+        return aspectRatio
+
+  def getPlotSize(self):
+    xLeft, xRight = self.axes.get_xlim()
+    yLow, yHigh = self.axes.get_ylim()
+
+    return [abs((xRight - xLeft)),abs((yHigh - yLow))]
+
+  def addPointMarker(self, x, y, annotate:bool = True, percentage:float=0.05):
+      rwidth, rheight = self.getPlotSize()
+      rwidth = rwidth * percentage
+      rheight = rheight * percentage
+      aspect = self.getFrameAspectRatio() 
+      if aspect > 0 :
+        rwidth = rwidth * aspect
+      label = f"({x:.2f}, {y:.1f})"
+      contour = Rectangle((x-0.5*rwidth, y-0.5*rheight), rwidth, rheight, edgecolor='r', facecolor='none')  # Círculo vermelho sem preenchimento
+      self.axes.add_patch(contour)
+      if annotate:
+        annotation = self.axes.annotate(label, xy=(x, y), xytext=(x+0.5*rwidth, y+0.5*rheight))
+      else:
+        annotation = None
+      self.pointMarkers.append({"contour":contour,"annotation":annotation})
+      self.canvas.draw()  
+
+  def removePointMarker(self):
+      if self.pointMarkers:
+          marker = self.pointMarkers.pop()
+          contour=marker["contour"]
+          annotation=marker["annotation"]
+          contour.remove()
+          if annotation is not None:
+              annotation.remove()
+          self.canvas.draw() 

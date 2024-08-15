@@ -25,7 +25,6 @@
 
 import wxpserial
 import FlightLogger
-import FlightStatistics
 
 """
     Codes for sending messages to rRocket
@@ -131,7 +130,7 @@ class rRocketModel(wxpserial.wxPSerial):
         self.capacitorRechargeTime = 0
         self.N = 0
         self.deltaT = 0
-        self.createFlightLoggerAndStatistics()
+        self.createFlightLogger()
         self.createFlightSimulationLogger()
         
         self.listOfParameters = []
@@ -146,7 +145,7 @@ class rRocketModel(wxpserial.wxPSerial):
     # Overriding the parent's method 
     def start(self, serialParameters: wxpserial.SerialParameters, notificationPeriod=250, parser=wxpserial.BracketsMessageParser("<",">")):
         wxpserial.wxPSerial.start(self, serialParameters, notificationPeriod,parser)
-        self.clearFlightLoggerAndStatistics()
+        self.clearFlightLogger()
         self.createFlightSimulationLogger()
 
     # Overriding the parent's method 
@@ -222,31 +221,25 @@ class rRocketModel(wxpserial.wxPSerial):
         log = []
         txt = self.parametersReport(cmt, eol) + self.errorsReport(cmt, eol) + self.eventsReport(cmt, eol)
 
-        log.append("")
-        log.append("Trajetória registrada na memória do altímetro")
-        log.append("%14s%14s"%("t (s)","h (m)"))
+        log.append(cmt)
+        log.append(cmt+"Trajetória registrada na memória do altímetro")
+        log.append(cmt+"%14s%14s"%("t (s)","h (m)"))
         for i in range(0,len(self.flightAltitudeLogger.t)):
             log.append("%14.3f%14.1f"%(self.flightAltitudeLogger.t[i],self.flightAltitudeLogger.h[i]))
 
         log.append("")
         for line in log:
-            txt = txt + cmt + line + eol
+            txt = txt + line + eol
         return txt
     
-    def flightStatisticsReport(self, cmt="# ", eol="\r\n"):
-        txt = self.flightReport(cmt, eol)
-        txt = txt + self.flightStatistics.report()
-        return txt
-
     def flightSimulationReport(self, cmt="# ", eol="\r\n"):
         txt = self.parametersReport(cmt, eol) + self.errorsReport(cmt, eol) 
         txt = txt + self.flightSimulationLogger.report()
         return txt
     
-    def createFlightLoggerAndStatistics(self):
+    def createFlightLogger(self):
         self.flightEvents = [] 
         self.flightAltitudeLogger = FlightLogger.FlightAltitudeLogger()
-        self.flightStatistics = FlightStatistics.FlightStatisticsS01()
         try:
           for observer in self.observerList:
             observer.rRocketModelFlightUpdate()
@@ -254,10 +247,9 @@ class rRocketModel(wxpserial.wxPSerial):
             pass
         return 
 
-    def clearFlightLoggerAndStatistics(self):
+    def clearFlightLogger(self):
         self.flightEvents = [] 
         self.flightAltitudeLogger.clear()
-        self.flightStatistics.clear()
         try:
           for observer in self.observerList:
             observer.rRocketModelFlightUpdate()
@@ -302,17 +294,12 @@ class rRocketModel(wxpserial.wxPSerial):
                 return p.desiredValue
         return None    
     
-    def calculateFlightStatistics(self):
-        t = self.flightAltitudeLogger.t
-        h = self.flightAltitudeLogger.h
-        self.flightStatistics.calculate(t, h)
-
     def readStaticParameters(self):
         self.sendMessage("<"+self.ocode.readStaticParameters+">")
     def readDynamicParameters(self):
         self.sendMessage("<"+self.ocode.readDynamicParameters+">")
     def writeDynamicParameters(self):
-        self.clearFlightLoggerAndStatistics()
+        self.clearFlightLogger()
         self.sendSpeedForLiftoffDetection(self.getDesiredValue("speedForLiftoffDetection"))
         self.sendSpeedForFallDetection(self.getDesiredValue("speedForFallDetection"))
         self.sendSpeedForApogeeDetection(self.getDesiredValue("speedForApogeeDetection"))
@@ -322,18 +309,18 @@ class rRocketModel(wxpserial.wxPSerial):
         self.sendTimeStepScaler(self.getDesiredValue("timeStepScaler"))
         self.sendMessage("<"+self.ocode.writeDynamicParameters+">")
     def resetToFactoryParameters(self):
-        self.clearFlightLoggerAndStatistics()
+        self.clearFlightLogger()
         self.sendMessage("<"+self.ocode.restoreToFactoryParameters+">")
     def clearLastFlight(self):
-        self.clearFlightLoggerAndStatistics()
+        self.clearFlightLogger()
         self.sendMessage("<"+self.ocode.clearFlightMemory+">")
     def readLastFlightData(self):
-        self.clearFlightLoggerAndStatistics()
+        self.clearFlightLogger()
         self.sendMessage("<"+self.ocode.readFlightReport+">")
-    def startSimulationMode(self, filename):
-        self.clearFlightLoggerAndStatistics()
+    def startSimulationMode(self, filename, simfilename):
+        self.clearFlightLogger()
         self.createFlightSimulationLogger(filename)
-        self.sendMessage(self.ocode.setSimulationMode+filename) # Special message to be handled by the communication thread
+        self.sendMessage(self.ocode.setSimulationMode+simfilename) # Special message to be handled by the communication thread
     def stopSimulationMode(self):
         self.sendMessage("<"+self.ocode.setSimulationMode+",0"+">")
     def sendAltitude(self, h):
@@ -412,7 +399,6 @@ class rRocketModel(wxpserial.wxPSerial):
                     self.setState(rRocketState["BusyForDataTransfer"])
                 if code == self.icode.finishedSendingMemoryReport:
                     updatedFlight = False
-                    self.calculateFlightStatistics()
                     for observer in self.observerList:
                         observer.rRocketModelFinishedReceivingMemoryReportUpdate()
                     if self.simulationMode == 0:
@@ -487,7 +473,6 @@ class rRocketModel(wxpserial.wxPSerial):
             for observer in self.observerList:
                     observer.rRocketModelParameterUpdate()
         if updatedFlight:
-            self.calculateFlightStatistics()
             for observer in self.observerList:
                     observer.rRocketModelFlightUpdate()
         if updatedSimulation:
