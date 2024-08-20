@@ -10,37 +10,52 @@ Versão 1.1.0
 1. [Baixe](https://github.com/gbertoldo/rRocket-UI/releases) a versão mais recente do executável (disponível apenas para Windows).
 1. Descompacte o arquivo zip baixado.
 1. No diretório do arquivo extraído há o executável rRocketUI.exe. Não é necessário realizar instalações, basta rodar esse arquivo. Se não houver erros, surgirá uma janela como ilustrado na figura abaixo:
-![rRocket-Start](https://github.com/user-attachments/assets/a294f31b-66ab-49e9-859d-e745f8a30fcb)
-
+<p align="center">
+<img src="https://github.com/user-attachments/assets/a294f31b-66ab-49e9-859d-e745f8a30fcb">
+</p>
 A janela da interface gráfica está organizada em cinco abas, detalhadas a seguir.
 
 ## Conexão
-Algumas das funcionalidades (configuração, leitura de memória e simulação) da interface gráfica são habilitadas apenas se o rRocket estiver conectado. Para realizar a conexão:
-1. Na aba *Conexão*, verifique as portas USB disponíveis, como ilustrado a seguir:<br>
+Algumas das funcionalidades da interface gráfica são habilitadas apenas se o rRocket estiver conectado. Para realizar a conexão:
+1. Na aba **Conexão**, verifique as portas USB disponíveis, como ilustrado a seguir:
+<p align="center">
 <img src="https://github.com/user-attachments/assets/caaf5ef6-676d-477b-9f76-0eebcc7bc446" width=300>
-<br>
-*Observação: a numeração das portas varia de um computador para outro.*
-1. Conecte o rRocket a uma porta USB do computador.
-1. Clique no botão para atualizar a lista de portas USB disponíveis
+</p> 
+
+**Observação: a numeração das portas varia de um computador para outro.**
+
+2. Conecte o rRocket a uma porta USB do computador.
+   
+4. Clique no botão para atualizar a lista de portas USB disponíveis:
+<p align="center">
 <img src="https://github.com/user-attachments/assets/ef589657-1311-4361-aa65-6f988ca14d4d" width=50>.
-1. Selecione a porta que apareceu após a conexão do rRocket (passo 2). <br>
-![rRocket-Connection1d](https://github.com/user-attachments/assets/1569bac2-ff04-4f5a-9920-1fe8743dad14) <br>
-1. Clique no botão *Conectar*. Se a conexão for bem sucedida, o ícone mudará de vermelho para verde.<br>
-![rRocket-Connection](https://github.com/user-attachments/assets/d386e3fb-8b3d-4128-969f-e89558cd01a0) <br>
+</p>
+
+4. Selecione a porta que apareceu após a conexão do rRocket (passo 2).
+<p align="center">
+<img src="https://github.com/user-attachments/assets/1569bac2-ff04-4f5a-9920-1fe8743dad14">
+</p>
+
+5. Clique no botão **Conectar**. Se a conexão for bem sucedida, o ícone de _status_ de conexão mudará de vermelho para verde.
+<p align="center">
+<img src="https://github.com/user-attachments/assets/d386e3fb-8b3d-4128-969f-e89558cd01a0">
+</p>
 
 ## Configuração
 ⚠️ As funcionalidades desta aba são habilitadas apenas se o rRocket estiver conectado.
 
 A aba *Configuração* permite ajustar os parâmetros de voo do rRocket. 
-![rRocket-Setup](https://github.com/user-attachments/assets/13b0ae66-016d-4036-af4d-346689ce2a66)
-
+<p align="center">
+<img src="https://github.com/user-attachments/assets/13b0ae66-016d-4036-af4d-346689ce2a66">
+ </p>
+ 
 No topo da aba é exibida a versão de _firmware_ do rRocket (_firmware_ é o _software_ que faz o dispositivo funcionar). Logo abaixo, há um formulário que lista (a) os parâmetros de voo, (b) os valores que estão gravados na memória do rRocket e (c) os valores desejados pelo usuário dos respectivos parâmetros. Abaixo do formulário há quatro botões:
-1. *Ler parâmetros*: solicita ao rRocket que envie a lista de parâmetros de voo gravados em sua memória permanente.
-1. *Relatório de parâmetros*: cria uma listagem textual dos parâmetros de voo gravados na memória. Esta listagem pode ser salva em arquivo para conferência futura.
-1. *Restaurar parâmetros originais*: solicita que rRocket substitua os parâmetros gravados pelos valores padrão definidos no _firmware_.
-1. *Gravar parâmetros*: envia os parâmetros desejados para gravação na memória permanente do rRocket.
+1. **Ler parâmetros**: solicita ao rRocket que envie a lista de parâmetros de voo gravados em sua memória permanente.
+1. **Relatório de parâmetros**: cria uma listagem textual dos parâmetros de voo gravados na memória. Esta listagem pode ser salva em arquivo para conferência futura.
+1. **Restaurar parâmetros originais**: solicita que rRocket substitua os parâmetros gravados pelos valores padrão definidos no _firmware_.
+1. **Gravar parâmetros**: envia os parâmetros desejados para gravação na memória permanente do rRocket.
 
-⚠️ *Para que os parâmetros desejados sejam gravados na memória do rRocket é necessário clicar no botão _Gravar parâmetros_ e observar a atualização dos valores gravados!* 
+⚠️ **Para que os parâmetros desejados sejam gravados na memória do rRocket é necessário clicar no botão _Gravar parâmetros_ e observar a atualização dos valores gravados!**
 
 ⚠️ *Após o carregamento de firmware no Arduino, a memória permanente (EEPROM) estará preenchida com dados desconhecidos. Isso deve gerar valores absurdos para os parâmetros de voo. Deste modo, no primeiro uso do altímetro, deve-se clicar em _Restaurar parâmetros originais_ para que os valores padrão sejam gravados na memória.* 
 
