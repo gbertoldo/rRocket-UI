@@ -70,21 +70,25 @@ Abaixo do gráfico, há três botões:
 ## Simulação
 ⚠️ As funcionalidades desta aba são habilitadas apenas se o rRocket estiver conectado.
 
-É possível observar/analisar o comportamento do rRocket quando sujeito a uma trajetória predefinida através do recurso de simulação. Para isso, na aba *Simulação*, basta fornecer o arquivo de texto com a tabela de dados de trajetória (altura _vs_ tempo) e clicar no botão *Iniciar simulação*. A interface solicita que o rRocket ative o modo simulado e utilize os dados da trajetória informada ao invés da leitura do barômetro. 
+É possível observar/analisar o comportamento do rRocket quando sujeito a uma trajetória predefinida através do recurso de simulação. Para isso, na aba *Simulação*, basta fornecer o arquivo de texto com a tabela de dados de trajetória (altura _vs_ tempo) e clicar no botão *Iniciar simulação*. A interface solicita que o rRocket ative o modo simulado e utilize os dados da trajetória informada ao invés da leitura do barômetro. Com este recurso, é possível avaliar se os parâmetros de voo estão adequados para a trajetória esperada.
 ![rRocket-Simulation1](https://github.com/user-attachments/assets/14ab204d-5086-4e1d-9d43-af540005be0b)
 
+O formato do arquivo de entrada pode ser especificado clicando-se no botão *Configurar formato*. Na janela de configuração, deve-se informar o caracter separador de campos (separador de colunas), o separador decimal (ponto ou vírgula), se há caractere usado para indicar comentário, o número de linhas de cabeçalho (que são ignoradas na leitura do arquivo), as colunas do tempo e da altura, bem como a unidade da altura.
 ![rRocket-Simulation2a](https://github.com/user-attachments/assets/eae38cee-0999-47b4-9425-caf786eabeb8)
 
+Por praticidade, os formatos de arquivo dos altímetros rRocket, MicroPeak e Stratologger já são predefinidos.
 ![rRocket-Simulation2b](https://github.com/user-attachments/assets/6c4e9e02-51cc-43a7-8532-fd02e55b1ece)
 
+Por fim, é possível gerar um relatório da simulação clicando-se em *Gerar relatório*.
 ![rRocket-Simulation3](https://github.com/user-attachments/assets/db617ae1-42cc-4dcb-90fb-59ab4862b01a)
 
 ## Estatística
 
-![rRocket-Statistics1](https://github.com/user-attachments/assets/b787cc25-acfc-40c0-ba3c-a045579e7a57)
-
+Esta aba permite analisar estatisticamente um voo. Não é necessário que o rRocket esteja conectado à interface. Basta carregar o arquivo da trajetória que se deseja analisar. A formatação do arquivo de entrada pode ser configurada como explicado na seção anterior. É possível também selecionar o modelo estatístico clicando-se no botão *Configurar*. Na versão atual há dois modelos: (a) filtro Kalman-Alfa e (b) média móvel. O primeiro combina o tradicional filtro de Kalman com um filtro alfa dinâmico para a velocidade. O segundo utiliza média móvel central para suavizar a velocidade e a aceleração.
 ![rRocket-Statistics2a](https://github.com/user-attachments/assets/d38730fd-90f3-4773-99d5-c8cc4cf48ba1)
-
 ![rRocket-Statistics2b](https://github.com/user-attachments/assets/0dbfd129-a289-4c84-bbc1-3107371a6cbf)
 
+Após o carregamento do arquivo, gera-se um gráfico com a altura bruta (isto é, a original), a altura filtrada, a velocidade e a aceleração. 
+![rRocket-Statistics1](https://github.com/user-attachments/assets/b787cc25-acfc-40c0-ba3c-a045579e7a57)
+O relatório da análise estatística pode ser acessado através do botão *Gerar relatório*
 ![rRocket-Statistics3](https://github.com/user-attachments/assets/ae3dbcf8-5dc7-4c5d-803f-a63a2ce57068)
