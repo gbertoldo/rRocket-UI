@@ -16,15 +16,17 @@ A janela da interface gráfica está organizada em cinco abas, detalhadas a segu
 
 ## Conexão
 Algumas das funcionalidades (configuração, leitura de memória e simulação) da interface gráfica são habilitadas apenas se o rRocket estiver conectado. Para realizar a conexão:
-1. Na aba *Conexão*, verifique as portas USB disponíveis
-![rRocket-Connection1b](https://github.com/user-attachments/assets/caaf5ef6-676d-477b-9f76-0eebcc7bc446)
+1. Na aba *Conexão*, verifique as portas USB disponíveis, como ilustrado a seguir:<br>
+<img src="https://github.com/user-attachments/assets/caaf5ef6-676d-477b-9f76-0eebcc7bc446" width=300>
+<br>
 *Observação: a numeração das portas varia de um computador para outro.*
 1. Conecte o rRocket a uma porta USB do computador.
-1. Clique no botão para atualizar a lista de portas USB disponíveis ![rRocket-Connection1c](https://github.com/user-attachments/assets/ef589657-1311-4361-aa65-6f988ca14d4d).
- Selecione a porta que apareceu após a conexão do rRocket (passo 2). 
-![rRocket-Connection1d](https://github.com/user-attachments/assets/1569bac2-ff04-4f5a-9920-1fe8743dad14)
-1. Clique no botão *Conectar*. Se a conexão for bem sucedida, o ícone mudará de vermelho para verde.
-![rRocket-Connection](https://github.com/user-attachments/assets/d386e3fb-8b3d-4128-969f-e89558cd01a0)
+1. Clique no botão para atualizar a lista de portas USB disponíveis
+<img src="https://github.com/user-attachments/assets/ef589657-1311-4361-aa65-6f988ca14d4d" width=50>.
+1. Selecione a porta que apareceu após a conexão do rRocket (passo 2). <br>
+![rRocket-Connection1d](https://github.com/user-attachments/assets/1569bac2-ff04-4f5a-9920-1fe8743dad14) <br>
+1. Clique no botão *Conectar*. Se a conexão for bem sucedida, o ícone mudará de vermelho para verde.<br>
+![rRocket-Connection](https://github.com/user-attachments/assets/d386e3fb-8b3d-4128-969f-e89558cd01a0) <br>
 
 ## Configuração
 ⚠️ As funcionalidades desta aba são habilitadas apenas se o rRocket estiver conectado.
