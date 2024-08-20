@@ -42,6 +42,17 @@ No topo da aba é exibida a versão de _firmware_ do rRocket (_firmware_ é o _s
 
 ⚠️ *Após o carregamento de firmware no Arduino, a memória permanente (EEPROM) estará preenchida com dados desconhecidos. Isso deve gerar valores absurdos para os parâmetros de voo. Deste modo, no primeiro uso do altímetro, deve-se clicar em _Restaurar parâmetros originais_ para que os valores padrão sejam gravados na memória.* 
 
+### Parâmetros de voo
+- Velocidade (em módulo) para detecção de decolagem (m/s): velocidade a partir da qual gera-se o evento de voo de decolagem. Se este parâmetro for muito baixo (abaixo de 15 m/s, por exemplo), rajadas de vento laterais podem causar falso evento de decolagem. Por outro lado, se o parâmetro for muito alto (acima de 50 m/s, por exemplo), é possível que voos mais baixos não sejam detectados.
+- Velocidade (em módulo) para detecção de queda (m/s): velocidade a partir da qual detecta-se queda em uma situação de reinicialização do computador de bordo durante o voo. A reinicialização durante o voo é totalmente indesejável, mas pode ocorrer devido à falha de alimentação de energia ou caso o botão do Arduino seja pressionado acidentalmente, por exemplo. Neste caso, o rRocket tenta detectar a queda e acionar os paraquedas.
+- Velocidade para detecção de apogeu (m/s): o apogeu ocorre quando a componente vertical do vetor velocidade é nula. No entanto, é possível ajustar este parâmetro para acionar o paraquedas auxiliar (drogue) um pouco antes (velocidade positiva) ou um pouco depois (velocidade negativa) do apogeu. 
+- Altura acima do ponto de lançamento para acionamento do paraquedas principal (m): caso o minifoguete possua dois paraquedas, o primeiro (drogue) é acionado no apogeu e o segundo (paraquedas principal) é acionado na altura definida por este parâmetro.
+- Deslocamento máximo para detecção de pouso (m): o rRocket mantém um registro de N leituras de altura, onde o N é um número inteiro definido no _firmware_. Para gerar o evento de pouso, a variação de altura nos N registros deve ser menor que o valor definido neste parâmetro.
+- Número máximo de tentativas de acionamento de paraquedas (por paraquedas): determina o número de tentativas de acionamento dos paraquedas. O acionamento dos paraquedas é realizado através da descarga de um capacitor. Como o rRocket não possui um sistema de _feedback_ para avaliar se o paraquedas foi acionado, é recomendável realizar pelo menos três tentativas de acionamento.
+- Multiplicador de passo de tempo para registro de trajetória após acionamento do drogue: determina a frequência de armazenamento de dados na memória permanente após o apogeu. Até o apogeu, a trajetória é registrada com frequência de 10 Hz. Para voos mais longos, pode ser interessante reduzir a frequência de registro, tendo em vista que a memória EEPROM do Arduino Nano é de apenas 1024 bytes.
+
+⚠️  Recomenda-se testar os parâmetros de voo utilizando o recurso de simulação, descrito abaixo.
+
 ## Memória de voo
 ⚠️ As funcionalidades desta aba são habilitadas apenas se o rRocket estiver conectado.
 
@@ -51,7 +62,7 @@ Os dados do último voo do rRocket são recuperados nesta aba. Na parte central 
 Abaixo do gráfico, há três botões:
 - *Ler memória*: solicita a leitura/releitura de memória do rRocket. 
 - *Limpar memória*: apaga a memória do último voo.
-- *Relatório de voo*: gerar um relatório do último voo. Como ilustrado na figura abaixo, o relatório apresenta a versão de _firmware_ do rRocket, os parâmetros estáticos (definidos no _firmware_ e que não podem ser alterados na interface gráfica), os parâmetros de voo, códigos de erro, eventos de voo e a trajetória.
+- *Relatório de voo*: gerar um relatório do último voo. Como ilustrado na figura abaixo, o relatório apresenta a versão de _firmware_ do rRocket, os parâmetros estáticos (definidos no _firmware_ e que não podem ser alterados na interface gráfica), os parâmetros de voo, códigos de erro, eventos de voo e a trajetória. O relatório pode ser salvo em arquivo de texto para análise futura.
 ![rRocket-Memory2](https://github.com/user-attachments/assets/578825f9-5454-4cfe-b5df-66b777db1d9a)
 
 ⚠️ ANTES DE CADA LANÇAMENTO É NECESSÁRIO LIMPAR A MEMÓRIA DE VOO! É possível realizar essa operação pela interface, como descrito acima, ou pelo rRocket, segurando o botão pressionado por cinco segundos. Caso a memória de voo esteja limpa, o computador de bordo emitirá um bipe a cada 1,5 s.
@@ -59,4 +70,21 @@ Abaixo do gráfico, há três botões:
 ## Simulação
 ⚠️ As funcionalidades desta aba são habilitadas apenas se o rRocket estiver conectado.
 
+É possível observar/analisar o comportamento do rRocket quando sujeito a uma trajetória predefinida através do recurso de simulação. Para isso, na aba *Simulação*, basta fornecer o arquivo de texto com a tabela de dados de trajetória (altura _vs_ tempo) e clicar no botão *Iniciar simulação*. A interface solicita que o rRocket ative o modo simulado e utilize os dados da trajetória informada ao invés da leitura do barômetro. 
+![rRocket-Simulation1](https://github.com/user-attachments/assets/14ab204d-5086-4e1d-9d43-af540005be0b)
+
+![rRocket-Simulation2a](https://github.com/user-attachments/assets/eae38cee-0999-47b4-9425-caf786eabeb8)
+
+![rRocket-Simulation2b](https://github.com/user-attachments/assets/6c4e9e02-51cc-43a7-8532-fd02e55b1ece)
+
+![rRocket-Simulation3](https://github.com/user-attachments/assets/db617ae1-42cc-4dcb-90fb-59ab4862b01a)
+
 ## Estatística
+
+![rRocket-Statistics1](https://github.com/user-attachments/assets/b787cc25-acfc-40c0-ba3c-a045579e7a57)
+
+![rRocket-Statistics2a](https://github.com/user-attachments/assets/d38730fd-90f3-4773-99d5-c8cc4cf48ba1)
+
+![rRocket-Statistics2b](https://github.com/user-attachments/assets/0dbfd129-a289-4c84-bbc1-3107371a6cbf)
+
+![rRocket-Statistics3](https://github.com/user-attachments/assets/ae3dbcf8-5dc7-4c5d-803f-a63a2ce57068)
